@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CGPA Calculator — LNMIIT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5f7fc;
+    --grid:#eef0f7;
+    --grid-major:#dfe4f0;
+    --ink:#20233f;
+    --ink-soft:#777c98;
+    --pen:#ed6a3b;
+    --pen-soft:#ffe1d7;
+    --navy:#6257e8;
+    --navy-deep:#4338c8;
+    --gold:#f3ae36;
+    --good:#1f9d72;
+    --card-bg:#ffffff;
+    --gauge-track:#e8e9f5;
+  }
+  body.dark{
+    --paper:#111321;
+    --grid:#202437;
+    --grid-major:#30364d;
+    --ink:#f2f2fb;
+    --ink-soft:#a4aac2;
+    --pen:#ff986f;
+    --pen-soft:#4a2a31;
+    --navy:#9b92ff;
+    --navy-deep:#7469ef;
+    --gold:#ffc861;
+    --good:#59d7a2;
+    --card-bg:#1a1e30;
+    --gauge-track:#30354d;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'DM Sans',sans-serif;
+    min-height:100vh;
+    padding:32px 20px 80px;
+    transition:background-color .25s, color .25s;
+    position:relative;
+  }
+  body::before{content:""; position:fixed; width:560px; height:560px; border-radius:50%; background:rgba(98,87,232,.10); filter:blur(74px); top:-260px; right:-180px; pointer-events:none;}
+  body::after{content:""; position:fixed; width:430px; height:430px; border-radius:50%; background:rgba(46,192,203,.08); filter:blur(74px); bottom:-230px; left:-120px; pointer-events:none;}
+  .wrap{max-width:1120px;margin:0 auto; position:relative; z-index:1;}
+  svg.icon{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;}
+
+  /* Header */
+  header{
+    display:flex; flex-wrap:wrap; gap:28px;
+    align-items:center; justify-content:space-between;
+    border:1px solid var(--grid-major); border-radius:24px;
+    padding:24px 26px; margin-bottom:22px; background:var(--card-bg);
+    box-shadow:0 16px 42px rgba(31,35,67,.08);
+  }
+  .title-block{display:flex; gap:16px; align-items:center;}
+  .logo-mark{
+    flex:none; width:132px; height:68px; overflow:hidden;
+    background:transparent;
+  }
+  .logo-mark img{display:block; width:100%; height:100%; object-fit:cover;}
+  #gaugeArc{stroke:#c6f7f4 !important;}
+  h1{font-family:'Space Grotesk',sans-serif; font-size:clamp(29px,4vw,42px); margin:0; font-weight:700; letter-spacing:-.045em;}
+  .title-block p{margin:0; color:var(--ink-soft); font-size:14.5px; max-width:46ch;}
+
+  .gauge-box{
+    min-width:360px; display:flex; align-items:center; gap:19px; padding:15px 20px 15px 15px;
+    background:linear-gradient(135deg, #353076, #6257e8); border:0; border-radius:18px;
+    box-shadow:0 14px 28px rgba(70,57,196,.27); position:relative; overflow:hidden;
+  }
+  .gauge-box::after{
+    content:""; position:absolute; width:140px; height:140px; border-radius:50%;
+    background:#b6e8f1; opacity:.2; right:-48px; bottom:-68px; pointer-events:none;
+  }
+  #gauge{width:128px; height:128px; flex:none; position:relative; z-index:1; filter:drop-shadow(0 6px 6px rgba(7,83,135,.12));}
+  .theme-toggle{
+    position:fixed; top:20px; right:20px; z-index:50;
+    width:46px; height:46px; border-radius:50%; border:1px solid var(--grid-major);
+    background:var(--card-bg); color:var(--ink); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(31,35,67,.12);
+    transition:background .15s, transform .1s;
+  }
+  .theme-toggle:hover{background:var(--navy); color:#fff; transform:translateY(-2px);}
+  .theme-toggle:active{transform:scale(.94);}
+  .theme-toggle svg{width:19px;height:19px;}
+  .gauge-readout{position:relative; z-index:1; text-align:left; min-width:0;}
+  .gauge-readout .label{font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(255,255,255,.72); text-transform:uppercase; letter-spacing:.14em; display:flex; align-items:center; justify-content:flex-start; gap:6px;}
+  .gauge-readout .val{font-family:'Space Grotesk',sans-serif; font-size:52px; line-height:1.04; font-weight:700; color:#fff; letter-spacing:-.06em; margin:3px 0 6px;}
+  .gauge-readout .sub{font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(255,255,255,.68);}
+  .gauge-progress{height:7px; width:100%; min-width:150px; border-radius:999px; background:rgba(255,255,255,.22); margin-top:12px; overflow:hidden;}
+  .gauge-progress-fill{height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg, #4de1e8, #b7f6df); box-shadow:0 2px 8px rgba(77,225,232,.45); transition:width .35s ease;}
+
+  @media (max-width:720px){
+    body{padding:22px 14px 56px;}
+    header{gap:18px;}
+    .title-block{gap:12px;}
+    .logo-mark{width:110px; height:57px;}
+    .gauge-box{width:100%; min-width:0; justify-content:center;}
+    .gauge-readout{flex:1;}
+  }
+  @media (max-width:430px){
+    .title-block{display:block;}
+    .logo-mark{margin-bottom:12px;}
+    #gauge{width:110px; height:110px;}
+    .gauge-readout .val{font-size:42px;}
+    .gauge-progress{min-width:0;}
+  }
+
+  @media (max-width:640px){
+    body{padding:16px 12px 42px;}
+    header{padding:18px; border-radius:18px;}
+    .title-block{width:100%;}
+    h1{font-size:clamp(27px,8vw,35px);}
+    .gauge-box{padding:13px; gap:13px; border-radius:15px;}
+    #gauge{width:104px; height:104px;}
+    .gauge-readout .val{font-size:43px;}
+    .branch-tabs{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; padding:6px; border-radius:14px;}
+    .branch-tab{justify-content:center; padding:11px 8px;}
+    details.scale{padding:2px 14px; border-radius:14px;}
+    .scale-grid{grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px;}
+    .semester{border-radius:15px;}
+    .semester-head{padding:14px 15px;}
+    .semester-head .sname{font-size:15px;}
+    .semester-head .sgpa{font-size:11px;}
+    .semester-head .chev{display:none;}
+    .semester-body{padding:0;}
+    table, tbody{display:block;}
+    thead{display:none;}
+    tbody tr{
+      display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px 12px;
+      padding:14px 15px; border-bottom:1px solid var(--grid);
+    }
+    tbody tr:last-child{border-bottom:0;}
+    tbody td{padding:0; border:0; min-width:0;}
+    tbody td:nth-child(1){grid-column:2; grid-row:1; align-self:center;}
+    tbody td:nth-child(2){grid-column:1; grid-row:1; align-self:center;}
+    tbody td:nth-child(3){grid-column:1 / -1; grid-row:2; color:var(--ink); font-size:14px; line-height:1.35;}
+    tbody td:nth-child(4){grid-column:1; grid-row:3; display:flex; align-items:center; gap:8px;}
+    tbody td:nth-child(5){grid-column:2; grid-row:3; display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+    tbody td:nth-child(4)::before, tbody td:nth-child(5)::before{font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft);}
+    tbody td:nth-child(4)::before{content:'Credits';}
+    tbody td:nth-child(5)::before{content:'Grade';}
+    .credits-input{width:50px;}
+    select.grade{min-width:76px;}
+    .semester-foot{justify-content:space-between; padding:10px 14px; gap:6px;}
+    .semester-foot span{padding:5px 7px; font-size:10.5px;}
+    .sem8-options{grid-template-columns:1fr; padding:14px 15px 3px;}
+    footer{align-items:flex-start;}
+  }
+
+  /* Branch tabs */
+  .branch-tabs{
+    display:flex; gap:7px; margin-bottom:22px; flex-wrap:wrap; padding:7px;
+    border:1px solid var(--grid-major); border-radius:16px; background:var(--card-bg);
+    box-shadow:0 10px 28px rgba(31,35,67,.05);
+  }
+  .branch-tab{
+    font-family:'JetBrains Mono',monospace; font-weight:600; font-size:13px;
+    padding:11px 18px 11px 14px; border:1px solid transparent; background:transparent;
+    cursor:pointer; color:var(--ink-soft); border-radius:8px;
+    transition:background .18s, color .18s, transform .15s, box-shadow .18s;
+    display:flex; align-items:center; gap:7px;
+  }
+  .branch-tab:active{transform:scale(.97);}
+  .branch-tab.active{background:linear-gradient(135deg, var(--navy-deep), var(--navy)); color:#fff; border-color:var(--navy); box-shadow:0 6px 14px rgba(98,87,232,.28);}
+  .branch-tab:hover:not(.active){background:var(--grid); color:var(--navy);}
+  .branch-tab svg{width:15px;height:15px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+
+  /* Scale panel */
+  details.scale{
+    border:1px solid var(--grid-major); border-radius:16px; padding:2px 18px;
+    margin-bottom:26px; background:var(--card-bg); box-shadow:0 10px 28px rgba(31,35,67,.05);
+  }
+  details.scale > summary{
+    cursor:pointer; padding:10px 0; font-family:'JetBrains Mono',monospace;
+    font-size:12.5px; font-weight:600; color:var(--navy); list-style:none;
+    display:flex; align-items:center; gap:8px;
+  }
+  details.scale > summary::-webkit-details-marker{display:none;}
+  details.scale > summary .chevsm{transition:transform .15s;}
+  details.scale[open] > summary .chevsm{transform:rotate(90deg);}
+  .scale-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr));
+    gap:10px; padding:6px 0 16px;
+  }
+  .scale-item{display:flex; flex-direction:column; gap:5px; align-items:center;
+    border:1px solid var(--grid-major); border-radius:10px; padding:10px 4px; background:var(--paper);}
+  .scale-item label{font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:var(--navy);}
+  .scale-item input{width:48px; text-align:center; border:1px solid var(--grid-major); border-radius:7px; padding:4px; background:var(--card-bg); color:var(--ink); font-family:'JetBrains Mono',monospace; font-size:13px;}
+
+  /* Semester cards */
+  .semester{
+    background:var(--card-bg); border:1px solid var(--grid-major); border-radius:18px;
+    margin-bottom:18px; overflow:hidden; box-shadow:0 10px 28px rgba(31,35,67,.06);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .semester:hover{transform:translateY(-2px); box-shadow:0 16px 32px rgba(31,35,67,.11);}
+  .semester-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:16px 20px; background:linear-gradient(120deg, var(--navy-deep), var(--navy)); color:#fff; cursor:pointer;
+    user-select:none;
+  }
+  .semester-head .sname{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px; display:flex; align-items:center; gap:9px;}
+  .semester-head .sgpa{font-family:'JetBrains Mono',monospace; font-size:13px; opacity:.9;}
+  .semester-head .chev{transition:transform .18s; display:flex;}
+  .semester.collapsed .chev{transform:rotate(-90deg);}
+  .semester-body{padding:6px 0;}
+  .semester.collapsed .semester-body{display:none;}
+
+  table{width:100%; border-collapse:collapse;}
+  thead th{
+    font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase;
+    letter-spacing:.08em; color:var(--ink-soft); text-align:left; padding:11px 20px; background:var(--paper);
+    border-bottom:1px solid var(--grid-major);
+  }
+  tbody td{padding:12px 20px; border-bottom:1px solid var(--grid); font-size:14px; vertical-align:middle;}
+  tbody tr{transition:background .15s;}
+  tbody tr:hover{background:color-mix(in srgb, var(--navy) 4%, transparent);}
+  tbody tr:last-child td{border-bottom:none;}
+  tr.row-excluded{opacity:.42;}
+  .row-check{width:16px; height:16px; accent-color:var(--navy); cursor:pointer;}
+  .code{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px; color:var(--navy); background:color-mix(in srgb, var(--navy) 10%, transparent); padding:4px 6px; border-radius:6px;}
+  .cname-input{
+    border:none; background:transparent; font-size:14px; font-family:'Inter',sans-serif;
+    width:100%; padding:4px 2px; border-radius:4px; color:var(--ink);
+  }
+  .cname-input:focus{outline:1.5px solid var(--navy); background:var(--card-bg);}
+  .credits-input{
+    width:52px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px;
+    border:1px solid var(--grid-major); border-radius:7px; padding:6px 2px; background:var(--card-bg); color:var(--ink);
+  }
+  select.grade{
+    font-family:'JetBrains Mono',monospace; font-weight:600; font-size:13px;
+    padding:7px 9px; border:1px solid var(--grid-major); border-radius:8px; background:var(--card-bg);
+    color:var(--pen); min-width:78px; box-shadow:0 2px 5px rgba(23,50,87,.06);
+  }
+
+  .semester-foot{
+    display:flex; justify-content:flex-end; gap:10px; padding:12px 18px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft); background:var(--paper);
+  }
+  .semester-foot span{padding:5px 9px; border-radius:999px; background:var(--card-bg); border:1px solid var(--grid-major);}
+  .semester-foot b{color:var(--navy);}
+
+  .sem8-options{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:10px; padding:16px 18px 4px;
+  }
+  .sem8-opt-btn{
+    text-align:left; border:1px solid var(--grid-major); background:var(--card-bg);
+    border-radius:12px; padding:14px; cursor:pointer; display:flex;
+    flex-direction:column; gap:4px; transition:border-color .15s, background .15s, opacity .15s, transform .15s, box-shadow .15s;
+  }
+  .sem8-opt-btn .opt-num{
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--ink-soft); font-weight:600;
+  }
+  .sem8-opt-btn .opt-label{font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600; color:var(--ink);}
+  .sem8-opt-btn:hover{border-color:var(--navy); transform:translateY(-2px); box-shadow:0 6px 13px rgba(23,50,87,.09);}
+  .sem8-opt-btn.sel{border-color:var(--navy); background:linear-gradient(120deg, var(--navy-deep), var(--navy)); color:#fff; box-shadow:0 7px 14px rgba(11,111,176,.22);}
+  body.dark .sem8-opt-btn.sel .opt-label{color:#fff;}
+  .sem8-opt-btn.sel .opt-label{color:#fff;}
+  .sem8-opt-btn.sel .opt-num{color:var(--navy);}
+
+  footer{
+    margin-top:36px; padding:18px 0; border-top:1px solid var(--grid-major);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+  }
+  .foot-note{font-size:12.5px; color:var(--ink-soft); max-width:56ch; display:flex; gap:8px; align-items:flex-start;}
+  .reset-btn{
+    font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600;
+    background:transparent; border:1px solid var(--pen); color:var(--pen);
+    padding:10px 15px; border-radius:9px; cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+  }
+  .reset-btn:hover{background:var(--pen); color:#fff;}
+  .save-flag{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--good); opacity:0; transition:opacity .3s; display:flex; align-items:center; gap:4px;}
+  .save-flag.show{opacity:1;}
+</style>
+</head>
+<body>
+<button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+  <svg class="icon" viewBox="0 0 24 24" id="themeIconSun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  <svg class="icon" viewBox="0 0 24 24" id="themeIconMoon" style="display:none;"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+</button>
+<div class="wrap">
+
+  <header>
+    <div class="title-block">
+      <div class="logo-mark"><img src="lnmiit-logo-transparent.png" alt="LNMIIT logo"></div>
+      <div>
+        <h1>CGPA Calculator</h1>
+      </div>
+    </div>
+    <div class="gauge-box">
+      <svg id="gauge" viewBox="0 0 96 96" aria-label="Overall CGPA progress">
+        <circle cx="48" cy="48" r="40" fill="none" style="stroke:var(--gauge-track)" stroke-width="10" id="gaugeTrack"/>
+        <circle id="gaugeArc" cx="48" cy="48" r="40" fill="none" style="stroke:var(--navy)" stroke-width="10"
+          stroke-linecap="round" transform="rotate(-90 48 48)" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+      </svg>
+      <div class="gauge-readout">
+        <div class="label"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>Overall CGPA</div>
+        <div class="val" id="cgpaVal">—</div>
+        <div class="sub" id="creditsVal">0 credits counted</div>
+        <div class="gauge-progress" aria-hidden="true"><div class="gauge-progress-fill" id="gaugeProgressFill"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="branch-tabs" id="branchTabs"></div>
+
+  <details class="scale">
+    <summary><svg class="icon chevsm" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg><svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Grading scale (edit if your official scale differs)</summary>
+    <div class="scale-grid" id="scaleGrid"></div>
+  </details>
+
+  <div id="semesters"></div>
+
+  <footer>
+    <div class="foot-note"><svg class="icon" viewBox="0 0 24 24" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Your entries are saved automatically to this browser.</div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="save-flag" id="saveFlag"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>saved</span>
+      <button class="reset-btn" id="resetBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset this branch</button>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const EXCLUDED_CODES = new Set(["HS112","ME121","HS221"]);
+
+const BRANCH_ICONS = {
+  CSE: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg>',
+  ECE: '<svg viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.9 4.9 2.8 2.8"/><path d="m16.3 16.3 2.8 2.8"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.9 19.1 2.8-2.8"/><path d="m16.3 7.7 2.8-2.8"/><circle cx="12" cy="12" r="3"/></svg>',
+  CCE: '<svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 18v3"/><path d="m8 10 2 2-2 2"/><path d="M13 14h3"/></svg>',
+  ME: '<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'
+};
+
+const DATA = {
+CSE: [
+ [["PH111","Classical Physics","BSC",4],["MT111","Calculus and Ordinary Differential Equations","BSC",4],["EC111","Basic Electronics","ESC",4],["EC111L","Basic Electronics Lab","ESC",1.5],["CS111","Programming for Problem Solving","ESC",4.5],["HS111","Technical Communication in English","HSMC",3],["HS112","Indian Knowledge System","MC",1]],
+ [["HS121","Human Values and Ethics","HSMC",3],["ME121","Environmental Science","MC",1],["MT121","Linear Algebra and Complex Analysis","BSC",4],["CS121","Data Structures and Algorithms","ESC",4.5],["PH121L","UG Physics Laboratory","BSC",1.5],["CS122","Introduction to Scripting Languages","ESC",1],["CS123","Digital Systems","PC",4],["CS124","Discrete Mathematics","PC",3]],
+ [["MT211","Probability and Statistics","BSC",4],["EC211","Signals and Systems","PC",3],["CS211","Computer Organization and Architecture","PC",4],["CS213","Database Management Systems","PC",4],["CS214","Object Oriented Programming","PC",4],["CS215","Design and Analysis of Algorithms","PC",4]],
+ [["HS221","Constitutional Studies","MC",1],["HS222","Principles of Management","HSMC",3],["CS221","Web Programming","PC",1],["CS222","Theory of Computation","PC",3],["CS223","Operating Systems","PC",4],["CS224","Computer Networks","PC",4],["CS225","Data Science","PC",3],["PE1","Program Elective 1","PE",3]],
+ [["LN311","Summer Internship/Project","Project",4],["HS311","Psychology, Technology & Society","HSMC",3],["CS311","Software Engineering","PC",3],["CS312","Artificial Intelligence","PC",4],["CS313","Computer System Security","PC",4],["CS314","Software Development Lab","PC",1],["PE2","Program Elective 2","PE",3]],
+ [["LN321","B.Tech. Project (BTP)","Project",4],["HS321","Introduction to Economics","HSMC",3],["LN322","Seminar and Presentation Skills","Project",1],["MT321","Numerical Analysis and Scientific Computing","BSC",4],["PE3","Program Elective 3","PE",3],["PE4","Program Elective 4","PE",3],["OE1","Open Elective 1","OE",3]],
+ [["LN411","B.Tech. Project (BTP)","Project",4],["PE5","Program Elective 5","PE",3],["PE6","Program Elective 6","PE",3],["OE2","Open Elective 2","OE",3],["OE3","Open Elective 3","OE",3]],
+],
+ECE: [
+ [["PH111","Classical Physics","BSC",4],["MT111","Calculus and Ordinary Differential Equations","BSC",4],["EC111","Basic Electronics","ESC",4],["EC111L","Basic Electronics Lab","ESC",1.5],["CS111","Programming for Problem Solving","ESC",4.5],["HS111","Technical Communication in English","HSMC",3],["HS112","Indian Knowledge System","MC",1]],
+ [["HS121","Human Values and Ethics","HSMC",3],["ME121","Environmental Science","MC",1],["MT121","Linear Algebra and Complex Analysis","BSC",4],["CS121","Data Structures and Algorithms","ESC",4.5],["PH121L","UG Physics Laboratory","BSC",1.5],["CS122","Introduction to Scripting Languages","ESC",1],["EC121","Semiconductor Devices and Circuits","PC",3],["EC122","Analog Electronics","PC",3],["EC122L","Analog Electronics Lab","PC",1.5]],
+ [["MT211","Probability and Statistics","PC",4],["EC211","Signals and Systems","PC",3],["EC211L","Signals and Systems Lab","PC",1.5],["EC213","Digital Circuit and Systems","PC",3],["EC213L","Digital Circuit and Systems Lab","PC",1.5],["EC214","Engineering Electromagnetics","PC",3],["EC215","Microprocessor and Microcontroller","PC",3],["EC215L","Microprocessor and Microcontroller Lab","PC",1.5],["EC216","Network Analysis and Synthesis","PC",3]],
+ [["HS221","Constitutional Studies","MC",1],["EC221","Analog and Digital Communication","PC",3],["EC221L","Analog and Digital Communication Lab","PC",1.5],["EC222","Fundamentals of VLSI","PC",3],["EC222L","VLSI Lab","PC",1.5],["EC223","Microwave Engineering","PC",3],["EC223L","Microwave Engineering Lab","PC",1.5],["EC224L","Design and Project Lab","PC",1.5],["CC321","Introduction to AI and ML","PC",4]],
+ [["LN311","Summer Internship/Project","Project",4],["HS311","Psychology, Technology & Society","HSMC",3],["EC311","Wireless Communication","PC",3],["EC311L","Wireless Communication Lab","PC",1.5],["EC312","Control System Engineering","PC",4],["EC313","Digital Signal Processing","PC",3],["EC313L","Digital Signal Processing Lab","PC",1.5],["PE1","Program Elective 1","PE",3]],
+ [["LN321","B.Tech. Project (BTP)","Project",4],["HS321","Introduction to Economics","HSMC",3],["LN322","Seminar and Presentation Skills","Project",1],["EC321","5G Wireless Systems and Beyond","PC",3],["CC221","Computer Communication Networks","PC",4],["PE2","Program Elective 2","PE",3],["PE3","Program Elective 3","PE",3],["OE1","Open Elective 1","OE",3]],
+ [["LN411","B.Tech. Project (BTP)","Project",4],["PE4","Program Elective 4","PE",3],["PE5","Program Elective 5","PE",3],["OE2","Open Elective 2","OE",3],["OE3","Open Elective 3","OE",3]],
+],
+CCE: [
+ [["PH111","Classical Physics","BSC",4],["MT111","Calculus and Ordinary Differential Equations","BSC",4],["EC111","Basic Electronics","ESC",4],["EC111L","Basic Electronics Lab","ESC",1.5],["CS111","Programming for Problem Solving","ESC",4.5],["HS111","Technical Communication in English","HSMC",3],["HS112","Indian Knowledge System","MC",1]],
+ [["HS121","Human Values and Ethics","HSMC",3],["ME121","Environmental Science","MC",1],["MT121","Linear Algebra and Complex Analysis","BSC",4],["CS121","Data Structures and Algorithms","ESC",4.5],["PH121L","UG Physics Laboratory","BSC",1.5],["CS122","Introduction to Scripting Languages","ESC",1],["CS123","Digital Systems","PC",4],["CS124","Discrete Mathematics","PC",3]],
+ [["MT211","Probability and Statistics","BSC",4],["CS215","Design and Analysis of Algorithms","PC",4],["EC212","Signals and Systems","PC",4],["CS212","Computer Organization and Architecture","PC",3],["CS213","Database Management Systems","ESC",4],["CS214","Object Oriented Programming","PC",4]],
+ [["HS221","Constitutional Studies","MC",1],["CS221","Web Programming","PC",1],["CS223","Operating Systems","PC",4],["CC221","Computer Communication Networks","PC",4],["EC221","Analog and Digital Communication","PC",3],["EC221L","Analog and Digital Communication Lab","PC",1.5],["CC222","Embedded Systems and IoT","PC",4.5],["PE1","Program Elective 1","PE",3]],
+ [["LN311","Summer Internship/Project","Project",4],["HS311","Psychology, Technology & Society","HSMC",3],["EC311","Wireless Communication","PC",3],["EC311L","Wireless Communication Lab","PC",1.5],["CS311","Software Engineering","PC",3],["EC313","Digital Signal Processing","PC",3],["EC313L","Digital Signal Processing Lab","PC",1.5],["CS314","Software Development Lab","PC",1],["PE2","Program Elective 2","PE",3]],
+ [["LN321","B.Tech. Project (BTP)","Project",4],["HS321","Introduction to Economics","HSMC",3],["LN322","Seminar and Presentation Skills","Project",1],["EC317","Information Theory and Coding","PC",3],["EC318","Control System Engineering","PC",3],["CC321","Introduction to AI and ML","PC",4],["PE3","Program Elective 3","PE",3]],
+ [["LN411","B.Tech. Project (BTP)","Project",4],["PE4","Program Elective 4","PE",3],["PE5","Program Elective 5","PE",3],["OE1","Open Elective 1","OE",3],["OE2","Open Elective 2","OE",3]],
+],
+ME: [
+ [["PH111","Classical Physics","BSC",4],["MT111","Calculus and Ordinary Differential Equations","BSC",4],["EC111","Basic Electronics","ESC",4],["EC111L","Basic Electronics Lab","ESC",1.5],["CS111","Programming for Problem Solving","ESC",4.5],["HS111","Technical Communication in English","HSMC",3],["HS112","Indian Knowledge System","MC",1]],
+ [["HS121","Human Values and Ethics","HSMC",3],["ME121","Environmental Science","MC",1],["MT121","Linear Algebra and Complex Analysis","BSC",4],["CS121","Data Structures and Algorithms","ESC",4.5],["PH121L","UG Physics Lab","BSC",1.5],["CS122","Introduction to Scripting Languages","ESC",1],["ME122","Introduction to Mechanical Engineering","PC",1],["ME123","Engineering Drawing and Graphics","PC",1.5],["ME124","Workshop Practices","PC",1.5],["ME125","Engineering Physical Metallurgy","PC",3]],
+ [["MT211","Probability and Statistics","BSC",4],["ME211","Mechanics of Solids","PC",4],["ME212","Rigid Body Dynamics","PC",2],["ME213","Engineering Thermodynamics","PC",4],["ME214","Welding and Casting","PC",4],["ME215","Electrical Technology","PC",3]],
+ [["HS221","Constitutional Studies","MC",1],["ME221","Design of Machine Elements","PC",3],["ME222","Fluid Mechanics and Machinery","PC",5],["ME223","Machining and Metal Forming","PC",4],["ME224","Mechanisms and Machines","PC",3],["ME225","Introduction to Computational Methods","PC",1],["ME226","Industrial Measurements","PC",4]],
+ [["LN311","Summer Internship/Project","Project",4],["ME311","Heat Transfer","PC",4],["ME312","Design of Transmission Elements","PC",4],["ME313","Digital Manufacturing","PC",4],["ME314","Robotics and Control","PC",3],["ME315","Mechatronics & IoT","PC",3]],
+ [["LN321","B.Tech. Project (BTP)","Project",4],["HS321","Introduction to Economics","HSMC",3],["LN322","Seminar and Presentation Skills","Project",1],["ME321","IC Engines","PC",4],["ME322","Finite Element Methods","PC",3],["ME323","Industrial Engineering and Management","PC",3],["PE1","Program Elective 1","PE",3]],
+ [["LN411","B.Tech. Project (BTP)","Project",4],["OE1","Open Elective 1","OE",3],["PE2","Program Elective 2","PE",3],["PE3","Program Elective 3","PE",3],["PE4","Program Elective 4","PE",3],["OE2","Open Elective 2","OE",3]],
+]
+};
+
+const SEM8_OPTIONS = {
+  1: { label:"Industrial SLI", subjects:[["LN421","Industrial SLI","Project",12]] },
+  2: { label:"Thesis", subjects:[["LN422","Thesis","Project",12]] },
+  3: { label:"4 Elective Courses", subjects:[["S8O3E1","Elective Course 1","OE/PE",3],["S8O3E2","Elective Course 2","OE/PE",3],["S8O3E3","Elective Course 3","OE/PE",3],["S8O3E4","Elective Course 4","OE/PE",3]] },
+  4: { label:"Project + 2 Electives", subjects:[["LN423","Project","Project",6],["S8O4E1","Elective Course 1","OE/PE",3],["S8O4E2","Elective Course 2","OE/PE",3]] },
+  5: { label:"Internship + 2 Electives", subjects:[["LN424","Internship","Project",6],["S8O5E1","Elective Course 1","OE/PE",3],["S8O5E2","Elective Course 2","OE/PE",3]] }
+};
+
+const DEFAULT_SCALE = [["A",10],["AB",9],["B",8],["BC",7],["C",6],["CD",5],["D",4],["F",0]];
+
+let state = {
+  branch: "CSE",
+  scale: Object.fromEntries(DEFAULT_SCALE),
+  grades: {},
+  names: {},
+  credits: {},
+  collapsed: {},
+  sem8Option: {},
+  included: {}
+};
+
+const el = id => document.getElementById(id);
+let saveTimer = null;
+const STORAGE_KEY = "cgpa-ledger-state-v2";
+const THEME_KEY = "cgpa-ledger-theme";
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = Object.assign(state, parsed);
+      const currentLabels = DEFAULT_SCALE.map(s=>s[0]).sort().join(",");
+      const savedLabels = Object.keys(state.scale||{}).sort().join(",");
+      if(savedLabels !== currentLabels){
+        state.scale = Object.fromEntries(DEFAULT_SCALE);
+      }
+    }
+  }catch(e){ console.error("load failed", e); }
+}
+
+function queueSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 300);
+}
+
+function saveNow(){
+  const flag = el("saveFlag");
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    flag.classList.remove("failed");
+    flag.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>saved`;
+    flag.classList.add("show");
+    setTimeout(()=>flag.classList.remove("show"), 1200);
+  }catch(e){
+    console.error("save failed", e);
+    flag.classList.add("show","failed");
+    flag.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>save failed`;
+  }
+}
+
+function loadTheme(){
+  let theme = "light";
+  try{ theme = localStorage.getItem(THEME_KEY) || "light"; }catch(e){}
+  applyTheme(theme);
+}
+function applyTheme(theme){
+  document.body.classList.toggle("dark", theme === "dark");
+  el("themeIconSun").style.display = theme === "dark" ? "none" : "block";
+  el("themeIconMoon").style.display = theme === "dark" ? "block" : "none";
+  try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+}
+el("themeToggle").addEventListener("click", ()=>{
+  const isDark = document.body.classList.contains("dark");
+  applyTheme(isDark ? "light" : "dark");
+});
+
+function renderBranchTabs(){
+  const box = el("branchTabs");
+  box.innerHTML = "";
+  Object.keys(DATA).forEach(b=>{
+    const btn = document.createElement("button");
+    btn.className = "branch-tab" + (b===state.branch ? " active":"");
+    btn.innerHTML = BRANCH_ICONS[b] + b;
+    btn.onclick = ()=>{ state.branch = b; queueSave(); renderAll(); };
+    box.appendChild(btn);
+  });
+}
+
+function renderScale(){
+  const grid = el("scaleGrid");
+  grid.innerHTML = "";
+  DEFAULT_SCALE.forEach(([label])=>{
+    const val = state.scale[label] ?? Object.fromEntries(DEFAULT_SCALE)[label];
+    const wrap = document.createElement("div");
+    wrap.className = "scale-item";
+    wrap.innerHTML = `<label>${label}</label><input type="number" step="0.5" min="0" max="10" value="${val}">`;
+    wrap.querySelector("input").addEventListener("input", (e)=>{
+      state.scale[label] = parseFloat(e.target.value) || 0;
+      queueSave(); computeAndPaint();
+    });
+    grid.appendChild(wrap);
+  });
+}
+
+function branchKey(){ return state.branch; }
+function gradeKey(code){ return branchKey()+"::"+code; }
+
+function buildSubjectRow(code, name, credits, gKey, onGradeSet){
+  const nameVal = state.names[gKey] ?? name;
+  const creditVal = state.credits[gKey] ?? credits;
+  const gradeVal = state.grades[gKey] ?? "";
+  const includedVal = state.included[gKey] !== false;
+
+  const tr = document.createElement("tr");
+  if(!includedVal) tr.classList.add("row-excluded");
+
+  const tdCheck = document.createElement("td");
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.className = "row-check";
+  checkbox.checked = includedVal;
+  checkbox.title = "Include in SGPA/CGPA";
+  checkbox.addEventListener("change", e=>{
+    state.included[gKey] = e.target.checked;
+    tr.classList.toggle("row-excluded", !e.target.checked);
+    queueSave(); computeAndPaint();
+  });
+  tdCheck.appendChild(checkbox);
+  tr.appendChild(tdCheck);
+
+  const tdCode = document.createElement("td");
+  tdCode.innerHTML = `<span class="code">${code}</span>`;
+  tr.appendChild(tdCode);
+
+  const tdName = document.createElement("td");
+  tdName.textContent = nameVal;
+  tr.appendChild(tdName);
+
+  const tdCred = document.createElement("td");
+  const credInput = document.createElement("input");
+  credInput.type = "number"; credInput.step="0.5"; credInput.min="0";
+  credInput.className = "credits-input";
+  credInput.value = creditVal;
+  credInput.addEventListener("input", e=>{
+    state.credits[gKey] = parseFloat(e.target.value) || 0;
+    queueSave(); computeAndPaint();
+  });
+  tdCred.appendChild(credInput);
+  tr.appendChild(tdCred);
+
+  const tdGrade = document.createElement("td");
+  const sel = document.createElement("select");
+  sel.className = "grade";
+  let opts = `<option value="">—</option>`;
+  DEFAULT_SCALE.forEach(([label])=>{ opts += `<option value="${label}" ${gradeVal===label?"selected":""}>${label}</option>`; });
+  sel.innerHTML = opts;
+  sel.addEventListener("change", e=>{
+    const val = e.target.value;
+    if(val && onGradeSet) onGradeSet();
+    state.grades[gKey] = val;
+    queueSave(); computeAndPaint();
+  });
+  tdGrade.appendChild(sel);
+  tr.appendChild(tdGrade);
+
+  return tr;
+}
+
+function renderSemesters(){
+  const container = el("semesters");
+  container.innerHTML = "";
+  const semesters = DATA[state.branch];
+
+  semesters.forEach((subjects, sIdx)=>{
+    const visible = subjects.filter(s=>!EXCLUDED_CODES.has(s[0]));
+
+    const card = document.createElement("div");
+    card.className = "semester" + (state.collapsed[state.branch+"-"+sIdx] ? " collapsed":"");
+
+    const head = document.createElement("div");
+    head.className = "semester-head";
+    head.innerHTML = `<span class="sname"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Semester ${sIdx+1}</span><span style="display:flex;align-items:center;gap:14px;"><span class="sgpa" data-sgpa="${sIdx}">SGPA —</span><span class="chev"><svg class="icon" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></span>`;
+    head.onclick = ()=>{
+      const key = state.branch+"-"+sIdx;
+      state.collapsed[key] = !state.collapsed[key];
+      queueSave();
+      card.classList.toggle("collapsed");
+    };
+    card.appendChild(head);
+
+    const body = document.createElement("div");
+    body.className = "semester-body";
+
+    const table = document.createElement("table");
+    table.innerHTML = `<thead><tr><th style="width:34px;"></th><th style="width:90px;">Code</th><th>Course</th><th style="width:90px;">Credits</th><th style="width:120px;">Grade</th></tr></thead>`;
+    const tbody = document.createElement("tbody");
+
+    visible.forEach(([code, name, type, credits])=>{
+      tbody.appendChild(buildSubjectRow(code, name, credits, gradeKey(code)));
+    });
+
+    table.appendChild(tbody);
+    body.appendChild(table);
+
+    const foot = document.createElement("div");
+    foot.className = "semester-foot";
+    foot.innerHTML = `<span>Credits counted: <b data-scred="${sIdx}">0</b></span><span>SGPA: <b data-sgpafoot="${sIdx}">—</b></span>`;
+    body.appendChild(foot);
+
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+
+  renderSemester8(container);
+}
+
+function renderSemester8(container){
+  const sIdx = 7;
+  const selected = state.sem8Option[state.branch];
+
+  const card = document.createElement("div");
+  card.className = "semester" + (state.collapsed[state.branch+"-"+sIdx] ? " collapsed":"");
+
+  const head = document.createElement("div");
+  head.className = "semester-head";
+  head.innerHTML = `<span class="sname"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Semester 8</span><span style="display:flex;align-items:center;gap:14px;"><span class="sgpa" data-sgpa="${sIdx}">SGPA —</span><span class="chev"><svg class="icon" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></span>`;
+  head.onclick = ()=>{
+    const key = state.branch+"-"+sIdx;
+    state.collapsed[key] = !state.collapsed[key];
+    queueSave();
+    card.classList.toggle("collapsed");
+  };
+  card.appendChild(head);
+
+  const body = document.createElement("div");
+  body.className = "semester-body";
+
+  const optionBar = document.createElement("div");
+  optionBar.className = "sem8-options";
+  Object.entries(SEM8_OPTIONS).forEach(([num, opt])=>{
+    const btn = document.createElement("button");
+    const isSel = selected === num;
+    btn.type = "button";
+    btn.className = "sem8-opt-btn" + (isSel ? " sel":"");
+    btn.innerHTML = `<span class="opt-num">Option ${num}</span><span class="opt-label">${opt.label}</span>`;
+    btn.onclick = ()=>{
+      state.sem8Option[state.branch] = isSel ? null : num;
+      queueSave(); renderAll();
+    };
+    optionBar.appendChild(btn);
+  });
+  body.appendChild(optionBar);
+
+  if(selected){
+    const clearOtherOptions = ()=>{
+      Object.entries(SEM8_OPTIONS).forEach(([num, opt])=>{
+        if(num === selected) return;
+        opt.subjects.forEach(([code])=>{
+          const gKey = gradeKey(code);
+          delete state.grades[gKey];
+          delete state.credits[gKey];
+          delete state.names[gKey];
+        });
+      });
+    };
+    const table = document.createElement("table");
+    table.innerHTML = `<thead><tr><th style="width:34px;"></th><th style="width:90px;">Code</th><th>Course</th><th style="width:90px;">Credits</th><th style="width:120px;">Grade</th></tr></thead>`;
+    const tbody = document.createElement("tbody");
+    SEM8_OPTIONS[selected].subjects.forEach(([code, name, type, credits])=>{
+      tbody.appendChild(buildSubjectRow(code, name, credits, gradeKey(code), clearOtherOptions));
+    });
+    table.appendChild(tbody);
+    body.appendChild(table);
+  }
+
+  const foot = document.createElement("div");
+  foot.className = "semester-foot";
+  foot.innerHTML = `<span>Credits counted: <b data-scred="${sIdx}">0</b></span><span>SGPA: <b data-sgpafoot="${sIdx}">—</b></span>`;
+  body.appendChild(foot);
+
+  card.appendChild(body);
+  container.appendChild(card);
+}
+
+function computeAndPaint(){
+  const semesters = DATA[state.branch];
+  let totalPoints = 0, totalCredits = 0;
+
+  semesters.forEach((subjects, sIdx)=>{
+    let semPoints = 0, semCredits = 0;
+    subjects.forEach(([code])=>{
+      if(EXCLUDED_CODES.has(code)) return;
+      const gKey = gradeKey(code);
+      if(state.included[gKey] === false) return;
+      const grade = state.grades[gKey];
+      if(!grade) return;
+      const credit = state.credits[gKey] ?? (DATA[state.branch][sIdx].find(s=>s[0]===code)[3]);
+      const points = state.scale[grade] ?? Object.fromEntries(DEFAULT_SCALE)[grade];
+      semPoints += credit * points;
+      semCredits += credit;
+    });
+    totalPoints += semPoints;
+    totalCredits += semCredits;
+    paintSemesterFoot(sIdx, semPoints, semCredits);
+  });
+
+  // Semester 8 (option-based)
+  const selected = state.sem8Option[state.branch];
+  let s8Points = 0, s8Credits = 0;
+  if(selected){
+    SEM8_OPTIONS[selected].subjects.forEach(([code, , , defCredits])=>{
+      const gKey = gradeKey(code);
+      if(state.included[gKey] === false) return;
+      const grade = state.grades[gKey];
+      if(!grade) return;
+      const credit = state.credits[gKey] ?? defCredits;
+      const points = state.scale[grade] ?? Object.fromEntries(DEFAULT_SCALE)[grade];
+      s8Points += credit * points;
+      s8Credits += credit;
+    });
+  }
+  totalPoints += s8Points;
+  totalCredits += s8Credits;
+  paintSemesterFoot(7, s8Points, s8Credits);
+
+  const cgpa = totalCredits ? (totalPoints/totalCredits) : null;
+  el("cgpaVal").textContent = cgpa!==null ? cgpa.toFixed(2) : "—";
+  el("creditsVal").textContent = totalCredits + " credits counted";
+
+  const circumference = 251.2;
+  const pct = cgpa!==null ? Math.min(cgpa/10, 1) : 0;
+  el("gaugeArc").setAttribute("stroke-dashoffset", (circumference * (1-pct)).toFixed(1));
+  el("gaugeProgressFill").style.width = (pct * 100).toFixed(1) + "%";
+}
+
+function paintSemesterFoot(sIdx, semPoints, semCredits){
+  const sgpa = semCredits ? (semPoints/semCredits) : null;
+  const sgpaStr = sgpa!==null ? sgpa.toFixed(2) : "—";
+  const sgpaEl = document.querySelector(`[data-sgpa="${sIdx}"]`);
+  if(sgpaEl) sgpaEl.textContent = "SGPA " + sgpaStr;
+  const sgpaFoot = document.querySelector(`[data-sgpafoot="${sIdx}"]`);
+  if(sgpaFoot) sgpaFoot.textContent = sgpaStr;
+  const scredEl = document.querySelector(`[data-scred="${sIdx}"]`);
+  if(scredEl) scredEl.textContent = semCredits;
+}
+
+function renderAll(){
+  renderBranchTabs();
+  renderScale();
+  renderSemesters();
+  computeAndPaint();
+}
+
+el("resetBtn").addEventListener("click", ()=>{
+  if(!confirm("Clear all entered grades for "+state.branch+"?")) return;
+  Object.keys(state.grades).forEach(k=>{ if(k.startsWith(state.branch+"::")) delete state.grades[k]; });
+  Object.keys(state.names).forEach(k=>{ if(k.startsWith(state.branch+"::")) delete state.names[k]; });
+  Object.keys(state.credits).forEach(k=>{ if(k.startsWith(state.branch+"::")) delete state.credits[k]; });
+  Object.keys(state.included).forEach(k=>{ if(k.startsWith(state.branch+"::")) delete state.included[k]; });
+  delete state.sem8Option[state.branch];
+  queueSave();
+  renderAll();
+});
+
+loadTheme();
+loadState();
+renderAll();
+</script>
+</body>
+</html>
