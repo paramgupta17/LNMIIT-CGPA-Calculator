@@ -117,18 +117,20 @@
 
   @media (max-width:640px){
     body{padding:16px 12px 42px;}
-    header{padding:18px; border-radius:18px;}
-    .title-block{width:100%;}
-    h1{font-size:clamp(27px,8vw,35px);}
-    .gauge-box{padding:13px; gap:13px; border-radius:15px;}
-    #gauge{width:104px; height:104px;}
-    .gauge-readout .val{font-size:43px;}
+    header{padding:17px; gap:16px; border-radius:18px;}
+    .title-block{width:100%; gap:11px; align-items:center;}
+    .logo-mark{width:104px; height:54px;}
+    h1{font-size:clamp(25px,7.6vw,33px); line-height:1.05;}
+    .gauge-box{width:100%; min-width:0; padding:13px; gap:13px; border-radius:15px;}
+    #gauge{width:98px; height:98px;}
+    .gauge-readout .val{font-size:41px;}
+    .gauge-readout .label{font-size:9px;}
     .branch-tabs{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; padding:6px; border-radius:14px;}
     .branch-tab{justify-content:center; padding:11px 8px;}
     details.scale{padding:2px 14px; border-radius:14px;}
     .scale-grid{grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px;}
-    .semester{border-radius:15px;}
-    .semester-head{padding:14px 15px;}
+    .semester{border-radius:15px; margin-bottom:13px;}
+    .semester-head{padding:14px 15px; min-height:54px;}
     .semester-head .sname{font-size:15px;}
     .semester-head .sgpa{font-size:11px;}
     .semester-head .chev{display:none;}
@@ -137,7 +139,7 @@
     thead{display:none;}
     tbody tr{
       display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px 12px;
-      padding:14px 15px; border-bottom:1px solid var(--grid);
+      padding:15px; border-bottom:1px solid var(--grid); background:var(--card-bg);
     }
     tbody tr:last-child{border-bottom:0;}
     tbody td{padding:0; border:0; min-width:0;}
@@ -155,6 +157,14 @@
     .semester-foot span{padding:5px 7px; font-size:10.5px;}
     .sem8-options{grid-template-columns:1fr; padding:14px 15px 3px;}
     footer{align-items:flex-start;}
+  }
+
+  @media (max-width:380px){
+    .title-block{align-items:flex-start;}
+    .logo-mark{width:96px; height:50px;}
+    h1{font-size:27px;}
+    .gauge-readout .val{font-size:38px;}
+    .semester-foot{flex-wrap:wrap; justify-content:flex-start;}
   }
 
   /* Branch tabs */
@@ -401,6 +411,7 @@ let state = {
   names: {},
   credits: {},
   collapsed: {},
+  collapseDefaultsVersion: 0,
   sem8Option: {},
   included: {}
 };
@@ -421,6 +432,15 @@ function loadState(){
       if(savedLabels !== currentLabels){
         state.scale = Object.fromEntries(DEFAULT_SCALE);
       }
+    }
+    if(state.collapseDefaultsVersion !== 1){
+      Object.keys(DATA).forEach(branch=>{
+        for(let sIdx=0; sIdx<8; sIdx++){
+          state.collapsed[branch+"-"+sIdx] = sIdx > 0;
+        }
+      });
+      state.collapseDefaultsVersion = 1;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
   }catch(e){ console.error("load failed", e); }
 }
@@ -560,16 +580,17 @@ function renderSemesters(){
 
   semesters.forEach((subjects, sIdx)=>{
     const visible = subjects.filter(s=>!EXCLUDED_CODES.has(s[0]));
+    const collapseKey = state.branch+"-"+sIdx;
+    const isCollapsed = state.collapsed[collapseKey] ?? (sIdx > 0);
 
     const card = document.createElement("div");
-    card.className = "semester" + (state.collapsed[state.branch+"-"+sIdx] ? " collapsed":"");
+    card.className = "semester" + (isCollapsed ? " collapsed":"");
 
     const head = document.createElement("div");
     head.className = "semester-head";
     head.innerHTML = `<span class="sname"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Semester ${sIdx+1}</span><span style="display:flex;align-items:center;gap:14px;"><span class="sgpa" data-sgpa="${sIdx}">SGPA —</span><span class="chev"><svg class="icon" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></span>`;
     head.onclick = ()=>{
-      const key = state.branch+"-"+sIdx;
-      state.collapsed[key] = !state.collapsed[key];
+      state.collapsed[collapseKey] = !card.classList.contains("collapsed");
       queueSave();
       card.classList.toggle("collapsed");
     };
@@ -604,16 +625,17 @@ function renderSemesters(){
 function renderSemester8(container){
   const sIdx = 7;
   const selected = state.sem8Option[state.branch];
+  const collapseKey = state.branch+"-"+sIdx;
+  const isCollapsed = state.collapsed[collapseKey] ?? true;
 
   const card = document.createElement("div");
-  card.className = "semester" + (state.collapsed[state.branch+"-"+sIdx] ? " collapsed":"");
+  card.className = "semester" + (isCollapsed ? " collapsed":"");
 
   const head = document.createElement("div");
   head.className = "semester-head";
   head.innerHTML = `<span class="sname"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Semester 8</span><span style="display:flex;align-items:center;gap:14px;"><span class="sgpa" data-sgpa="${sIdx}">SGPA —</span><span class="chev"><svg class="icon" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></span>`;
   head.onclick = ()=>{
-    const key = state.branch+"-"+sIdx;
-    state.collapsed[key] = !state.collapsed[key];
+    state.collapsed[collapseKey] = !card.classList.contains("collapsed");
     queueSave();
     card.classList.toggle("collapsed");
   };
