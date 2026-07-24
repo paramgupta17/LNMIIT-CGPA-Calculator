@@ -72,15 +72,15 @@ Everything works directly inside your browser.
 
 <div align="center">
 
-### Desktop View
+### Light Mode
 
-<img src="display1.png" alt="Desktop Preview" width="900"/>
+<img src="display2.png" alt="Desktop Preview" width="900"/>
 
 <br><br>
 
 ### Dark Mode
 
-<img src="display2.png" alt="Dark Mode Preview" width="900"/>
+<img src="display1.png" alt="Dark Mode Preview" width="900"/>
 
 </div>
 
