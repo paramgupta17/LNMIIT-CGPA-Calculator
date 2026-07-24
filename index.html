@@ -8,34 +8,34 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#f5f7fc;
-    --grid:#eef0f7;
-    --grid-major:#dfe4f0;
-    --ink:#20233f;
-    --ink-soft:#777c98;
-    --pen:#ed6a3b;
-    --pen-soft:#ffe1d7;
-    --navy:#6257e8;
-    --navy-deep:#4338c8;
-    --gold:#f3ae36;
-    --good:#1f9d72;
+    --paper:#f7f4ec;
+    --grid:#ece5d3;
+    --grid-major:#ddd2b3;
+    --ink:#211f1a;
+    --ink-soft:#726a58;
+    --pen:#a8631e;
+    --pen-soft:#f1dcb8;
+    --navy:#1d2d50;
+    --navy-deep:#0e1830;
+    --gold:#b6912c;
+    --good:#2f7d5b;
     --card-bg:#ffffff;
-    --gauge-track:#e8e9f5;
+    --gauge-track:#ece5d3;
   }
   body.dark{
-    --paper:#111321;
-    --grid:#202437;
-    --grid-major:#30364d;
-    --ink:#f2f2fb;
-    --ink-soft:#a4aac2;
-    --pen:#ff986f;
-    --pen-soft:#4a2a31;
-    --navy:#9b92ff;
-    --navy-deep:#7469ef;
-    --gold:#ffc861;
-    --good:#59d7a2;
-    --card-bg:#1a1e30;
-    --gauge-track:#30354d;
+    --paper:#0c0e13;
+    --grid:#181c26;
+    --grid-major:#262c3a;
+    --ink:#ede8da;
+    --ink-soft:#9b9788;
+    --pen:#e0a458;
+    --pen-soft:#4a3520;
+    --navy:#3f5992;
+    --navy-deep:#25406e;
+    --gold:#d8b84a;
+    --good:#4fae86;
+    --card-bg:#141821;
+    --gauge-track:#232a3a;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -48,8 +48,8 @@
     transition:background-color .25s, color .25s;
     position:relative;
   }
-  body::before{content:""; position:fixed; width:560px; height:560px; border-radius:50%; background:rgba(98,87,232,.10); filter:blur(74px); top:-260px; right:-180px; pointer-events:none;}
-  body::after{content:""; position:fixed; width:430px; height:430px; border-radius:50%; background:rgba(46,192,203,.08); filter:blur(74px); bottom:-230px; left:-120px; pointer-events:none;}
+  body::before{content:""; position:fixed; width:560px; height:560px; border-radius:50%; background:rgba(182,145,44,.07); filter:blur(74px); top:-260px; right:-180px; pointer-events:none;}
+  body::after{content:""; position:fixed; width:430px; height:430px; border-radius:50%; background:rgba(29,45,80,.07); filter:blur(74px); bottom:-230px; left:-120px; pointer-events:none;}
   .wrap{max-width:1120px;margin:0 auto; position:relative; z-index:1;}
   svg.icon{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;}
 
@@ -67,20 +67,41 @@
     background:transparent;
   }
   .logo-mark img{display:block; width:100%; height:100%; object-fit:cover;}
-  #gaugeArc{stroke:#c6f7f4 !important;}
   h1{font-family:'Space Grotesk',sans-serif; font-size:clamp(29px,4vw,42px); margin:0; font-weight:700; letter-spacing:-.045em;}
-  .title-block p{margin:0; color:var(--ink-soft); font-size:14.5px; max-width:46ch;}
+  .title-block p{margin:6px 0 0; color:var(--ink-soft); font-size:14.5px; max-width:46ch;}
 
   .gauge-box{
-    min-width:360px; display:flex; align-items:center; gap:19px; padding:15px 20px 15px 15px;
-    background:linear-gradient(135deg, #353076, #6257e8); border:0; border-radius:18px;
-    box-shadow:0 14px 28px rgba(70,57,196,.27); position:relative; overflow:hidden;
+    min-width:380px; flex:1; display:flex; flex-direction:column; gap:14px;
+    padding:24px 28px 28px; background:linear-gradient(135deg, var(--navy-deep), var(--navy));
+    border:0; border-radius:20px; box-shadow:0 16px 32px rgba(14,24,48,.32);
+    position:relative; overflow:hidden;
   }
   .gauge-box::after{
-    content:""; position:absolute; width:140px; height:140px; border-radius:50%;
-    background:#b6e8f1; opacity:.2; right:-48px; bottom:-68px; pointer-events:none;
+    content:""; position:absolute; width:190px; height:190px; border-radius:50%;
+    background:var(--gold); opacity:.10; right:-60px; top:-90px; pointer-events:none;
   }
-  #gauge{width:128px; height:128px; flex:none; position:relative; z-index:1; filter:drop-shadow(0 6px 6px rgba(7,83,135,.12));}
+  .gauge-top{position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+  .gauge-top .label{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:rgba(255,255,255,.7); text-transform:uppercase; letter-spacing:.14em; display:flex; align-items:center; gap:6px;}
+  .gauge-top .sub{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:rgba(255,255,255,.55);}
+  .gauge-value-row{position:relative; z-index:1; display:flex; align-items:baseline; gap:8px;}
+  .gauge-value-row .val{font-family:'Space Grotesk',sans-serif; font-size:58px; line-height:1; font-weight:700; color:var(--gold); letter-spacing:-.04em; text-shadow:0 2px 16px rgba(182,145,44,.35);}
+  .gauge-value-row .val-max{font-family:'JetBrains Mono',monospace; font-size:16px; color:rgba(255,255,255,.4); font-weight:600;}
+  .gauge-track-wrap{position:relative; z-index:1; margin-top:14px; padding:0 2px;}
+  .gauge-track{position:relative; height:12px; border-radius:999px; background:rgba(255,255,255,.14);}
+  .gauge-fill{position:absolute; left:0; top:0; bottom:0; width:0%; border-radius:inherit; background:linear-gradient(90deg, var(--gold), #f2df9e); box-shadow:0 0 14px rgba(182,145,44,.55); transition:width .5s cubic-bezier(.4,0,.2,1);}
+  .gauge-thumb{
+    position:absolute; top:50%; left:0%; width:20px; height:20px; border-radius:50%;
+    background:#fff; border:3px solid var(--gold); transform:translate(-50%,-50%);
+    box-shadow:0 2px 10px rgba(0,0,0,.35); transition:left .5s cubic-bezier(.4,0,.2,1); z-index:2;
+  }
+  .gauge-thumb-tip{
+    position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+    background:#fff; color:var(--navy-deep); font-family:'JetBrains Mono',monospace;
+    font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; white-space:nowrap;
+    box-shadow:0 6px 14px rgba(0,0,0,.28);
+  }
+  .gauge-thumb-tip::after{content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:4px solid transparent; border-top-color:#fff;}
+  .gauge-ticks{display:flex; justify-content:space-between; margin-top:9px; font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(255,255,255,.4);}
   .theme-toggle{
     position:fixed; top:20px; right:20px; z-index:50;
     width:46px; height:46px; border-radius:50%; border:1px solid var(--grid-major);
@@ -92,27 +113,18 @@
   .theme-toggle:hover{background:var(--navy); color:#fff; transform:translateY(-2px);}
   .theme-toggle:active{transform:scale(.94);}
   .theme-toggle svg{width:19px;height:19px;}
-  .gauge-readout{position:relative; z-index:1; text-align:left; min-width:0;}
-  .gauge-readout .label{font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(255,255,255,.72); text-transform:uppercase; letter-spacing:.14em; display:flex; align-items:center; justify-content:flex-start; gap:6px;}
-  .gauge-readout .val{font-family:'Space Grotesk',sans-serif; font-size:52px; line-height:1.04; font-weight:700; color:#fff; letter-spacing:-.06em; margin:3px 0 6px;}
-  .gauge-readout .sub{font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(255,255,255,.68);}
-  .gauge-progress{height:7px; width:100%; min-width:150px; border-radius:999px; background:rgba(255,255,255,.22); margin-top:12px; overflow:hidden;}
-  .gauge-progress-fill{height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg, #4de1e8, #b7f6df); box-shadow:0 2px 8px rgba(77,225,232,.45); transition:width .35s ease;}
 
   @media (max-width:720px){
     body{padding:22px 14px 56px;}
     header{gap:18px;}
     .title-block{gap:12px;}
     .logo-mark{width:110px; height:57px;}
-    .gauge-box{width:100%; min-width:0; justify-content:center;}
-    .gauge-readout{flex:1;}
+    .gauge-box{width:100%; min-width:0;}
   }
   @media (max-width:430px){
     .title-block{display:block;}
     .logo-mark{margin-bottom:12px;}
-    #gauge{width:110px; height:110px;}
-    .gauge-readout .val{font-size:42px;}
-    .gauge-progress{min-width:0;}
+    .gauge-value-row .val{font-size:44px;}
   }
 
   @media (max-width:640px){
@@ -121,10 +133,9 @@
     .title-block{width:100%; gap:11px; align-items:center;}
     .logo-mark{width:104px; height:54px;}
     h1{font-size:clamp(25px,7.6vw,33px); line-height:1.05;}
-    .gauge-box{width:100%; min-width:0; padding:13px; gap:13px; border-radius:15px;}
-    #gauge{width:98px; height:98px;}
-    .gauge-readout .val{font-size:41px;}
-    .gauge-readout .label{font-size:9px;}
+    .gauge-box{width:100%; min-width:0; padding:18px 18px 22px; gap:11px; border-radius:15px;}
+    .gauge-value-row .val{font-size:42px;}
+    .gauge-top .label{font-size:9px;}
     .branch-tabs{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; padding:6px; border-radius:14px;}
     .branch-tab{justify-content:center; padding:11px 8px;}
     details.scale{padding:2px 14px; border-radius:14px;}
@@ -163,7 +174,7 @@
     .title-block{align-items:flex-start;}
     .logo-mark{width:96px; height:50px;}
     h1{font-size:27px;}
-    .gauge-readout .val{font-size:38px;}
+    .gauge-value-row .val{font-size:36px;}
     .semester-foot{flex-wrap:wrap; justify-content:flex-start;}
   }
 
@@ -309,19 +320,23 @@
       <div class="logo-mark"><img src="lnmiit-logo-transparent.png" alt="LNMIIT logo"></div>
       <div>
         <h1>CGPA Calculator</h1>
+        <p>Calculate your SGPA and CGPA effortlessly.</p>
       </div>
     </div>
     <div class="gauge-box">
-      <svg id="gauge" viewBox="0 0 96 96" aria-label="Overall CGPA progress">
-        <circle cx="48" cy="48" r="40" fill="none" style="stroke:var(--gauge-track)" stroke-width="10" id="gaugeTrack"/>
-        <circle id="gaugeArc" cx="48" cy="48" r="40" fill="none" style="stroke:var(--navy)" stroke-width="10"
-          stroke-linecap="round" transform="rotate(-90 48 48)" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
-      </svg>
-      <div class="gauge-readout">
-        <div class="label"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>Overall CGPA</div>
-        <div class="val" id="cgpaVal">—</div>
-        <div class="sub" id="creditsVal">0 credits counted</div>
-        <div class="gauge-progress" aria-hidden="true"><div class="gauge-progress-fill" id="gaugeProgressFill"></div></div>
+      <div class="gauge-top">
+        <span class="label"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>Overall CGPA</span>
+        <span class="sub" id="creditsVal">0 credits counted</span>
+      </div>
+      <div class="gauge-value-row">
+        <span class="val" id="cgpaVal">—</span><span class="val-max">/ 10</span>
+      </div>
+      <div class="gauge-track-wrap">
+        <div class="gauge-track">
+          <div class="gauge-fill" id="gaugeFill"></div>
+          <div class="gauge-thumb" id="gaugeThumb"><span class="gauge-thumb-tip" id="gaugeThumbTip">0.00</span></div>
+        </div>
+        <div class="gauge-ticks"><span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span></div>
       </div>
     </div>
   </header>
@@ -736,10 +751,10 @@ function computeAndPaint(){
   el("cgpaVal").textContent = cgpa!==null ? cgpa.toFixed(2) : "—";
   el("creditsVal").textContent = totalCredits + " credits counted";
 
-  const circumference = 251.2;
   const pct = cgpa!==null ? Math.min(cgpa/10, 1) : 0;
-  el("gaugeArc").setAttribute("stroke-dashoffset", (circumference * (1-pct)).toFixed(1));
-  el("gaugeProgressFill").style.width = (pct * 100).toFixed(1) + "%";
+  el("gaugeFill").style.width = (pct * 100).toFixed(1) + "%";
+  el("gaugeThumb").style.left = (pct * 100).toFixed(1) + "%";
+  el("gaugeThumbTip").textContent = cgpa!==null ? cgpa.toFixed(2) : "0.00";
 }
 
 function paintSemesterFoot(sIdx, semPoints, semCredits){
