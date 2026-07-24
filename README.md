@@ -35,7 +35,7 @@ Everything works directly inside your browser.
 
 # ✨ Features
 
-✅ Supports multiple branches
+## 🎓 Supported Branches
 
 - 💻 Computer Science & Engineering (CSE)
 - 📡 Electronics & Communication Engineering (ECE)
@@ -44,35 +44,45 @@ Everything works directly inside your browser.
 
 ---
 
-### 📚 Academic Features
+## 📚 Academic Features
 
-- 📊 Automatic SGPA calculation
-- 🎯 Automatic Overall CGPA calculation
-- 📖 Semester-wise course listing
-- 📝 Editable course names
-- 🎓 Editable credits
-- 🔢 Editable grading scale
-- 🚫 Automatically excludes non-graded mandatory courses
-- 🎓 Semester 8 Study Path selection
+- 📊 Automatic SGPA Calculation
+- 🎯 Automatic Overall CGPA Calculation
+- 📖 Semester-wise Course Listing
+- 📝 Editable Course Names
+- 🎓 Editable Credits
+- 🔢 Editable Grading Scale
+- 🚫 Automatically Excludes Non-Graded Mandatory Courses
+- 🎓 Semester 8 Study Path Selection
 
 ---
 
-### 🎨 User Experience
+## 🎨 User Experience
 
 - 🌙 Light / Dark Theme
 - 📱 Fully Responsive Design
-- 💾 Auto Save using Local Storage
+- 💾 Auto Save using Browser Local Storage
 - ⚡ Instant Calculations
-- 🎯 Clean Modern UI
-- 📈 Interactive CGPA Gauge
+- 🎯 Clean Modern Interface
+- 📈 Interactive CGPA Progress Gauge
 
 ---
 
 # 🖼️ Preview
 
-<p align="center">
-<img src="lnmiit-logo-transparent.png" width="300">
-</p>
+<div align="center">
+
+### Desktop View
+
+<img src="display1.png" alt="Desktop Preview" width="900"/>
+
+<br><br>
+
+### Dark Mode
+
+<img src="display2.png" alt="Dark Mode Preview" width="900"/>
+
+</div>
 
 ---
 
@@ -90,7 +100,7 @@ git clone https://github.com/yourusername/LNMIIT-CGPA-Calculator.git
 
 Simply open
 
-```
+```text
 index.html
 ```
 
@@ -98,48 +108,32 @@ in any modern browser.
 
 ---
 
-# 🌐 Deploy on Vercel
-
-1. Push the repository to GitHub.
-2. Create a new project on **Vercel**.
-3. Select **Other** as the framework.
-4. Leave the build command empty.
-5. Set output directory to:
-
-```
-.
-```
-
-6. Deploy.
-
-Vercel automatically serves `index.html`.
-
----
-
 # 💾 Data & Privacy
 
-✔ No backend
+✔ No Backend
 
-✔ No database
+✔ No Database
 
-✔ No account required
+✔ No User Accounts
 
-✔ No data collection
+✔ No Data Collection
 
-All information is stored locally using **Browser Local Storage**.
+All grades and preferences are stored locally using **Browser Local Storage**.
 
-Your grades never leave your device.
+Your data never leaves your device.
 
 ---
 
 # 📂 Project Structure
 
-```
+```text
 📦 LNMIIT-CGPA-Calculator
 │
 ├── index.html
-├── lnmiit-logo-transparent.png
-└── README.md
+├── README.md
+├── display1.png
+├── display2.png
+└── lnmiit-logo-transparent.png
 ```
 
 ---
@@ -149,20 +143,21 @@ Your grades never leave your device.
 - 🌐 HTML5
 - 🎨 CSS3
 - ⚡ Vanilla JavaScript
-- 💾 Local Storage API
-- 📱 Responsive Design
+- 💾 Browser Local Storage API
+- 📱 Responsive Web Design
 
 ---
 
 # 📌 Highlights
 
-- 🎯 Accurate CGPA Calculation
-- 📊 Credit Weighted Formula
-- 🌙 Dark Mode
-- 📱 Mobile Friendly
+- 🎯 Accurate Credit-Weighted CGPA Calculation
+- 📊 Semester-wise SGPA
+- 🌙 Dark Mode Support
+- 📱 Mobile Friendly UI
 - 💾 Automatic Saving
-- ⚡ Fast Performance
+- ⚡ Fast & Lightweight
 - 🚫 No Internet Required
+- 🧮 Fully Browser-Based
 
 ---
 
@@ -176,7 +171,7 @@ Always verify the curriculum and grading policy with the latest official LNMIIT 
 
 <div align="center">
 
-### ⭐ If you found this project useful, don't forget to Star the repository!
+### ⭐ If you found this project useful, consider giving it a Star!
 
 Made with ❤️ for LNMIIT Students
 
